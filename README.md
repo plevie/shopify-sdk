@@ -6,7 +6,7 @@ Java SDK for Shopify REST APIs
 |-----------|---------|--------|
 | CI Status | ![example branch parameter](https://github.com/plevie/shopify-sdk/actions/workflows/maven-develop.yml/badge.svg?branch=develop) | ![example branch parameter](https://github.com/plevie/shopify-sdk/actions/workflows/maven.yml/badge.svg?branch=master) |
 
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.channelape%3Ashopify-sdk&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.channelape%3Ashopify-sdk) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.channelape%3Ashopify-sdk&metric=coverage)](https://sonarcloud.io/component_measures?id=com.channelape%3Ashopify-sdk&metric=coverage)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=plevie_shopify-sdk&metric=alert_status)](https://sonarcloud.io/dashboard?id=plevie_shopify-sdk) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=plevie_shopify-sdk&metric=coverage)](https://sonarcloud.io/component_measures?id=plevie_shopify-sdk&metric=coverage)
 [![Maven Central](https://img.shields.io/maven-central/v/com.channelape/shopify-sdk.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.channelape%22%20AND%20a:%22shopify-sdk%22)
 
 
