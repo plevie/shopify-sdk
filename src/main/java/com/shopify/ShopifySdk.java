@@ -787,10 +787,10 @@ public class ShopifySdk {
         return getOrders(response);
     }
 
-    public ShopifyPage<ShopifyDraftOrder> getDraftOrders(final String pageInfo, final int pageSize) {
-        final Response response = get(buildDraftOrdersEndpoint().queryParam(LIMIT_QUERY_PARAMETER, pageSize)
+    public ShopifyPage<ShopifyOrder> getOrders(final String pageInfo, final int pageSize) {
+        final Response response = get(buildOrdersEndpoint().queryParam(LIMIT_QUERY_PARAMETER, pageSize)
                 .queryParam(PAGE_INFO_QUERY_PARAMETER, pageInfo));
-        return getDraftOrders(response);
+        return getOrders(response);
     }
 
     public ShopifyPage<ShopifyDraftOrder> getDraftOrders() {
@@ -852,7 +852,7 @@ public class ShopifySdk {
         return getDraftOrders(response);
     }
 
-    public ShopifyPage<ShopifyDraftOrder> getOrders(final String pageInfo, final int pageSize) {
+    public ShopifyPage<ShopifyDraftOrder> getDraftOrders(final String pageInfo, final int pageSize) {
         final Response response = get(buildDraftOrdersEndpoint().queryParam(LIMIT_QUERY_PARAMETER, pageSize)
                 .queryParam(PAGE_INFO_QUERY_PARAMETER, pageInfo));
         return getDraftOrders(response);
