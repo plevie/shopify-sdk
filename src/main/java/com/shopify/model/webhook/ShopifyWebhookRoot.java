@@ -1,7 +1,5 @@
 package com.shopify.model.webhook;
 
-import javax.xml.bind.annotation.XmlElement;
-
 public class ShopifyWebhookRoot {
 
     private ShopifyWebhook webhook;
