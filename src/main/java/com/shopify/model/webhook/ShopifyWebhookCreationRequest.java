@@ -54,7 +54,7 @@ public class ShopifyWebhookCreationRequest {
 
         @Override
         public BuildStep withFormat(ShopifyWebhookFormat format) {
-            request.getFormat();
+            request.setFormat(format);
             return this;
         }
 
