@@ -122,6 +122,11 @@ import com.shopify.model.ShopifyVariantCreationRequest;
 import com.shopify.model.ShopifyVariantMetafieldCreationRequest;
 import com.shopify.model.ShopifyVariantRoot;
 import com.shopify.model.ShopifyVariantUpdateRequest;
+import com.shopify.model.webhook.ShopifyWebhook;
+import com.shopify.model.webhook.ShopifyWebhookCreationRequest;
+import com.shopify.model.webhook.ShopifyWebhookFormat;
+import com.shopify.model.webhook.ShopifyWebhookRoot;
+import com.shopify.model.webhook.ShopifyWebhookTopic;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShopifySdkTest {
@@ -2711,6 +2716,54 @@ public class ShopifySdkTest {
         assertEquals(shippingLine1.getPrice(), actualShopifyDraftOrder.getShippingLines().get(0).getPrice());
         assertEquals(shippingLine1.getSource(), actualShopifyDraftOrder.getShippingLines().get(0).getSource());
         assertEquals(shippingLine1.getTitle(), actualShopifyDraftOrder.getShippingLines().get(0).getTitle());
+    }
+
+    @Test
+    public void givenSomeValidAccessTokenAndSubdomainAndValidRequestAndCreatingWebhookThenCreateAndReturn() throws Exception {
+
+        final String expectedPath = new StringBuilder().append(FORWARD_SLASH).append(ShopifySdk.API_VERSION_PREFIX)
+                .append(FORWARD_SLASH).append(SOME_API_VERSION).append(FORWARD_SLASH).append("webhooks").toString();
+        final ShopifyWebhookRoot shopifyWebhookRoot = new ShopifyWebhookRoot();
+        final ShopifyWebhook shopifyWebhook = new ShopifyWebhook();
+
+        shopifyWebhook.setAddress("https://example.com");
+        shopifyWebhook.setId("123");
+        shopifyWebhook.setApiVersion(SOME_API_VERSION);
+        shopifyWebhook.setFormat(ShopifyWebhookFormat.XML);
+        shopifyWebhook.setTopic(ShopifyWebhookTopic.CARTS_UPDATE);
+
+        shopifyWebhookRoot.setWebhook(shopifyWebhook);
+
+        final String expectedResponseBodyString = getJsonString(ShopifyWebhookRoot.class, shopifyWebhookRoot);
+
+        final Status expectedStatus = Status.CREATED;
+        final int expectedStatusCode = expectedStatus.getStatusCode();
+        final JsonBodyCapture actualRequestBody = new JsonBodyCapture();
+        driver.addExpectation(
+                onRequestTo(expectedPath).withHeader("X-Shopify-Access-Token", accessToken).withMethod(Method.POST)
+                        .capturingBodyIn(actualRequestBody),
+                giveResponse(expectedResponseBodyString, MediaType.APPLICATION_JSON).withStatus(expectedStatusCode));
+
+        final ShopifyWebhookCreationRequest shopifyWebhookCreationRequest = ShopifyWebhookCreationRequest.newBuilder()
+                .withAddress("https://example.com").withTopic(ShopifyWebhookTopic.CARTS_UPDATE)
+                .withFormat(ShopifyWebhookFormat.XML).build();
+        final ShopifyWebhook actualShopifyWebhook = shopifySdk.createWebhook(shopifyWebhookCreationRequest);
+
+        assertEquals("https://example.com", actualRequestBody.getContent().get("webhook").get("address").asText());
+        assertEquals(ShopifyWebhookFormat.XML.name(), actualRequestBody.getContent().get("webhook").get("format").asText());
+        assertEquals(ShopifyWebhookTopic.CARTS_UPDATE.name(),
+                actualRequestBody.getContent().get("webhook").get("topic").asText());
+
+        assertEquals(shopifyWebhook.getId(), actualShopifyWebhook.getId());
+        assertEquals(shopifyWebhook.getAddress(), actualShopifyWebhook.getAddress());
+        assertEquals(shopifyWebhook.getApiVersion(), actualShopifyWebhook.getApiVersion());
+        assertEquals(shopifyWebhook.getFields(), actualShopifyWebhook.getFields());
+        assertEquals(shopifyWebhook.getFormat(), actualShopifyWebhook.getFormat());
+        assertEquals(shopifyWebhook.getMetafieldNamespaces(), actualShopifyWebhook.getMetafieldNamespaces());
+        assertEquals(shopifyWebhook.getPrivateMetafieldNamespaces(), actualShopifyWebhook.getPrivateMetafieldNamespaces());
+        assertEquals(shopifyWebhook.getTopic(), actualShopifyWebhook.getTopic());
+        assertEquals(shopifyWebhook.getUpdatedAt(), actualShopifyWebhook.getUpdatedAt());
+
     }
 
     @Test
