@@ -127,6 +127,7 @@ import com.shopify.model.webhook.ShopifyWebhookCreationRequest;
 import com.shopify.model.webhook.ShopifyWebhookFormat;
 import com.shopify.model.webhook.ShopifyWebhookRoot;
 import com.shopify.model.webhook.ShopifyWebhookTopic;
+import com.shopify.model.webhook.ShopifyWebhooksRoot;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShopifySdkTest {
@@ -1841,6 +1842,30 @@ public class ShopifySdkTest {
     }
 
     @Test
+    public void givenSomeWebhookIdWhenRetrievingOrderThenRetrieveWebhook() throws JsonProcessingException {
+        final ShopifyWebhookRoot shopifyWebhookRoot = new ShopifyWebhookRoot();
+
+        final ShopifyWebhook shopifyWebhook = new ShopifyWebhook();
+        shopifyWebhook.setId("123");
+        shopifyWebhookRoot.setWebhook(shopifyWebhook);
+        final String expectedImageResponseBodyString = getJsonString(ShopifyWebhookRoot.class, shopifyWebhookRoot);
+
+        final String expectedPath = new StringBuilder().append(FORWARD_SLASH).append(ShopifySdk.API_VERSION_PREFIX)
+                .append(FORWARD_SLASH).append(SOME_API_VERSION).append(FORWARD_SLASH).append(ShopifySdk.WEBHOOKS)
+                .append(FORWARD_SLASH).append("123").toString();
+
+        final Status expectedStatus = Status.OK;
+        final int expectedStatusCode = expectedStatus.getStatusCode();
+        driver.addExpectation(
+                onRequestTo(expectedPath).withHeader(ShopifySdk.ACCESS_TOKEN_HEADER, accessToken).withMethod(Method.GET),
+                giveResponse(expectedImageResponseBodyString, MediaType.APPLICATION_JSON).withStatus(expectedStatusCode));
+
+        final ShopifyWebhook actualShopifyWebhook = shopifySdk.getWebhook("123");
+        assertEquals("123", actualShopifyWebhook.getId());
+
+    }
+
+    @Test
     public void givenSomePageSizeWhenRetrievingOrdersThenRetrieveOrdersWithCorrectValues() throws JsonProcessingException {
         final String expectedPath = new StringBuilder().append(FORWARD_SLASH).append(ShopifySdk.API_VERSION_PREFIX)
                 .append(FORWARD_SLASH).append(SOME_API_VERSION).append(FORWARD_SLASH).append(ShopifySdk.ORDERS).toString();
@@ -1902,6 +1927,43 @@ public class ShopifySdkTest {
 
         assertEquals("456", shopifyOrdersPage.getNextPageInfo());
         assertEquals("123", shopifyOrdersPage.getPreviousPageInfo());
+    }
+
+    @Test
+    public void givenSomePageSizeWhenRetrievingWebhooksThenRetrieveWebhooksWithCorrectValues() throws JsonProcessingException {
+        final String expectedPath = new StringBuilder().append(FORWARD_SLASH).append(ShopifySdk.API_VERSION_PREFIX)
+                .append(FORWARD_SLASH).append(SOME_API_VERSION).append(FORWARD_SLASH).append(ShopifySdk.WEBHOOKS).toString();
+
+        final ShopifyWebhooksRoot shopifyWebhooksRoot = new ShopifyWebhooksRoot();
+
+        final ShopifyWebhook shopifyWebhook1 = new ShopifyWebhook();
+        shopifyWebhook1.setId("someId");
+        shopifyWebhook1.setAddress("https://example.com");
+        shopifyWebhook1.setTopic(ShopifyWebhookTopic.CARTS_CREATE);
+
+        shopifyWebhooksRoot.setWebhooks(Arrays.asList(shopifyWebhook1));
+
+        final String expectedResponseBodyString = getJsonString(ShopifyWebhooksRoot.class, shopifyWebhooksRoot);
+
+        final Status expectedStatus = Status.OK;
+        final int expectedStatusCode = expectedStatus.getStatusCode();
+        driver.addExpectation(
+                onRequestTo(expectedPath).withHeader(ShopifySdk.ACCESS_TOKEN_HEADER, accessToken)
+                        .withParam(ShopifySdk.STATUS_QUERY_PARAMETER, ShopifySdk.ANY_STATUSES)
+                        .withParam(ShopifySdk.LIMIT_QUERY_PARAMETER, 50).withMethod(Method.GET),
+                giveResponse(expectedResponseBodyString, MediaType.APPLICATION_JSON).withHeader("Link",
+                        "<https://some-store.myshopify.com/admin/api/2019-10/webhooks?page_info=123>; rel=\"previous\", <https://humdingers-business-of-the-americas.myshopify.com/admin/api/2019-10/webhooks?page_info=456>; rel=\"next\"")
+                        .withStatus(expectedStatusCode));
+
+        final ShopifyPage<ShopifyWebhook> shopifyWebhooksPage = shopifySdk.getWebhooks();
+
+        final ShopifyWebhook shopifyOrder = shopifyWebhooksPage.get(0);
+        assertEquals(shopifyWebhook1.getId(), shopifyOrder.getId());
+        assertEquals(shopifyWebhook1.getAddress(), shopifyOrder.getAddress());
+        assertEquals(shopifyWebhook1.getTopic(), shopifyOrder.getTopic());
+
+        assertEquals("456", shopifyWebhooksPage.getNextPageInfo());
+        assertEquals("123", shopifyWebhooksPage.getPreviousPageInfo());
     }
 
     @Test
