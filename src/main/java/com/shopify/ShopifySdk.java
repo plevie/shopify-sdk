@@ -116,6 +116,10 @@ import com.shopify.model.ShopifyVariant;
 import com.shopify.model.ShopifyVariantMetafieldCreationRequest;
 import com.shopify.model.ShopifyVariantRoot;
 import com.shopify.model.ShopifyVariantUpdateRequest;
+import com.shopify.model.webhook.ShopifyWebhook;
+import com.shopify.model.webhook.ShopifyWebhookCreationRequest;
+import com.shopify.model.webhook.ShopifyWebhookRoot;
+import com.shopify.model.webhook.ShopifyWebhooksRoot;
 
 public class ShopifySdk {
 
@@ -147,6 +151,7 @@ public class ShopifySdk {
     static final String RECURRING_APPLICATION_CHARGES = "recurring_application_charges";
     static final String ORDERS = "orders";
     static final String DRAFT_ORDERS = "draft_orders";
+    static final String WEBHOOKS = "webhooks";
     static final String FULFILLMENTS = "fulfillments";
     static final String FULFILLMENT_ORDERS = "fulfillment_orders";
     static final String ACTIVATE = "activate";
@@ -673,6 +678,11 @@ public class ShopifySdk {
         return shopifyVariantRootResponse.getVariant();
     }
 
+    public boolean deleteWebhook(final String webhookId) {
+        final Response response = delete(buildWebhooksEndpoint().path(webhookId));
+        return Status.OK.getStatusCode() == response.getStatus();
+    }
+
     public boolean deleteProduct(final String productId) {
         final Response response = delete(getWebTarget().path(PRODUCTS).path(productId));
         return Status.OK.getStatusCode() == response.getStatus();
@@ -719,6 +729,12 @@ public class ShopifySdk {
         final Response response = get(buildDraftOrdersEndpoint().path(draftOrderId));
         final ShopifyDraftOrderRoot shopifyDraftOrderRootResponse = response.readEntity(ShopifyDraftOrderRoot.class);
         return shopifyDraftOrderRootResponse.getDraftOrder();
+    }
+
+    public ShopifyWebhook getWebhook(final String webhookId) {
+        final Response response = get(buildWebhooksEndpoint().path(webhookId));
+        final ShopifyWebhookRoot shopifyWebhookRootResponse = response.readEntity(ShopifyWebhookRoot.class);
+        return shopifyWebhookRootResponse.getWebhook();
     }
 
     public List<ShopifyTransaction> getOrderTransactions(final String orderId) {
@@ -858,6 +874,71 @@ public class ShopifySdk {
         return getDraftOrders(response);
     }
 
+    public ShopifyPage<ShopifyWebhook> getWebhooks() {
+        return getWebhooks(DEFAULT_REQUEST_LIMIT);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final int pageSize) {
+        final Response response = get(buildWebhooksEndpoint().queryParam(STATUS_QUERY_PARAMETER, ANY_STATUSES)
+                .queryParam(LIMIT_QUERY_PARAMETER, pageSize));
+        return getWebhooks(response);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final DateTime mininumCreationDate) {
+        return getWebhooks(mininumCreationDate, DEFAULT_REQUEST_LIMIT);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final DateTime mininumCreationDate, final int pageSize) {
+        final Response response = get(buildWebhooksEndpoint().queryParam(STATUS_QUERY_PARAMETER, ANY_STATUSES)
+                .queryParam(LIMIT_QUERY_PARAMETER, pageSize)
+                .queryParam(CREATED_AT_MIN_QUERY_PARAMETER, mininumCreationDate.toString()));
+        return getWebhooks(response);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final DateTime mininumCreationDate, final DateTime maximumCreationDate) {
+        return getWebhooks(mininumCreationDate, maximumCreationDate, DEFAULT_REQUEST_LIMIT);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getUpdatedWebhooksCreatedBefore(final DateTime minimumUpdatedAtDate,
+            final DateTime maximumUpdatedAtDate, final DateTime maximumCreatedAtDate, final int pageSize) {
+        final Response response = get(buildWebhooksEndpoint().queryParam(STATUS_QUERY_PARAMETER, ANY_STATUSES)
+                .queryParam(LIMIT_QUERY_PARAMETER, pageSize)
+                .queryParam(UPDATED_AT_MIN_QUERY_PARAMETER, minimumUpdatedAtDate.toString())
+                .queryParam(UPDATED_AT_MAX_QUERY_PARAMETER, maximumUpdatedAtDate.toString())
+                .queryParam(CREATED_AT_MAX_QUERY_PARAMETER, maximumCreatedAtDate.toString()));
+        return getWebhooks(response);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final DateTime mininumCreationDate, final DateTime maximumCreationDate,
+            final int pageSize) {
+        final Response response = get(buildWebhooksEndpoint().queryParam(STATUS_QUERY_PARAMETER, ANY_STATUSES)
+                .queryParam(LIMIT_QUERY_PARAMETER, pageSize)
+                .queryParam(CREATED_AT_MIN_QUERY_PARAMETER, mininumCreationDate.toString())
+                .queryParam(CREATED_AT_MAX_QUERY_PARAMETER, maximumCreationDate.toString()));
+        return getWebhooks(response);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final DateTime mininumCreationDate, final DateTime maximumCreationDate,
+            final String appId) {
+        return getWebhooks(mininumCreationDate, maximumCreationDate, appId, DEFAULT_REQUEST_LIMIT);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final DateTime mininumCreationDate, final DateTime maximumCreationDate,
+            final String appId, final int pageSize) {
+        final Response response = get(buildWebhooksEndpoint().queryParam(STATUS_QUERY_PARAMETER, ANY_STATUSES)
+                .queryParam(LIMIT_QUERY_PARAMETER, pageSize)
+                .queryParam(CREATED_AT_MIN_QUERY_PARAMETER, mininumCreationDate.toString())
+                .queryParam(CREATED_AT_MAX_QUERY_PARAMETER, maximumCreationDate.toString())
+                .queryParam(ATTRIBUTION_APP_ID_QUERY_PARAMETER, appId));
+        return getWebhooks(response);
+    }
+
+    public ShopifyPage<ShopifyWebhook> getWebhooks(final String pageInfo, final int pageSize) {
+        final Response response = get(buildWebhooksEndpoint().queryParam(LIMIT_QUERY_PARAMETER, pageSize)
+                .queryParam(PAGE_INFO_QUERY_PARAMETER, pageInfo));
+        return getWebhooks(response);
+    }
+
     /**
      * Creates a fulfillment in shopify
      * 
@@ -946,6 +1027,15 @@ public class ShopifySdk {
         final Response response = post(buildDraftOrdersEndpoint(), shopifyDraftOrderRoot);
         final ShopifyDraftOrderRoot shopifyDraftOrderRootResponse = response.readEntity(ShopifyDraftOrderRoot.class);
         return shopifyDraftOrderRootResponse.getDraftOrder();
+    }
+
+    public ShopifyWebhook createWebhook(final ShopifyWebhookCreationRequest shopifyWebhookCreationRequestc) {
+        final ShopifyWebhookRoot shopifyWebhookRoot = new ShopifyWebhookRoot();
+        final ShopifyWebhook shopifyWebhook = shopifyWebhookCreationRequestc.getRequest();
+        shopifyWebhookRoot.setWebhook(shopifyWebhook);
+        final Response response = post(buildWebhooksEndpoint(), shopifyWebhookRoot);
+        final ShopifyWebhookRoot shopifyWebhookRootResponse = response.readEntity(ShopifyWebhookRoot.class);
+        return shopifyWebhookRootResponse.getWebhook();
     }
 
     public ShopifyOrder updateOrderShippingAddress(final ShopifyOrderShippingAddressUpdateRequest shopifyOrderUpdateRequest) {
@@ -1161,6 +1251,11 @@ public class ShopifySdk {
     private ShopifyPage<ShopifyDraftOrder> getDraftOrders(final Response response) {
         final ShopifyDraftOrdersRoot shopifyDraftOrderRootResponse = response.readEntity(ShopifyDraftOrdersRoot.class);
         return mapPagedResponse(shopifyDraftOrderRootResponse.getDraftOrders(), response);
+    }
+
+    private ShopifyPage<ShopifyWebhook> getWebhooks(final Response response) {
+        final ShopifyWebhooksRoot shopifyWebhooksRootResponse = response.readEntity(ShopifyWebhooksRoot.class);
+        return mapPagedResponse(shopifyWebhooksRootResponse.getWebhooks(), response);
     }
 
     private Response get(final WebTarget webTarget) {
@@ -1382,6 +1477,10 @@ public class ShopifySdk {
 
     private WebTarget buildDraftOrdersEndpoint() {
         return getWebTarget().path(DRAFT_ORDERS);
+    }
+
+    private WebTarget buildWebhooksEndpoint() {
+        return getWebTarget().path(WEBHOOKS);
     }
 
     public List<ShopifyFulfillmentOrder> getFulfillmentOrdersFromOrder(final String shopifyOrderId) {

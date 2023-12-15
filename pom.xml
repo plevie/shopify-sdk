@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.plevie</groupId>
 	<artifactId>shopify-sdk</artifactId>
-	<version>3.0.0</version>
+	<version>3.1.0-SNAPSHOT</version>
 
 	<name>Shopify SDK</name>
 	<description>Java SDK for Shopify REST API.</description>
@@ -66,7 +66,7 @@
 		<slf4j.version>1.7.22</slf4j.version>
 		<jersey.version>2.25.1</jersey.version>
 		<pitest.version>1.4.3</pitest.version>
-		<jacoco.version>0.8.2</jacoco.version>
+		<jacoco.version>0.8.11</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -203,6 +203,9 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<formats>XML</formats>
+						</configuration>
 					</execution>
 					<execution>
 						<id>default-report-integration</id>
