@@ -496,8 +496,8 @@ public class ShopifySdk {
     public ShopifyProducts getProducts(List<String> ids) {
         WebTarget target = getWebTarget().path(PRODUCTS);
         if (ids != null) {
-            target.queryParam(LIMIT_QUERY_PARAMETER, ids.size());
-            target.queryParam(IDS_QUERY_PARAMETER, ids);
+            target = target.queryParam(LIMIT_QUERY_PARAMETER, ids.size());
+            target = target.queryParam(IDS_QUERY_PARAMETER, String.join(",", ids));
         }
 
         final Response response = get(target);
