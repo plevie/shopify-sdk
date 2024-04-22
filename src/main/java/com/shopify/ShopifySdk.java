@@ -493,6 +493,18 @@ public class ShopifySdk {
         return mapPagedResponse(shopifyProductsRoot.getProducts(), response);
     }
 
+    public ShopifyProducts getProducts(List<String> ids) {
+        WebTarget target = getWebTarget().path(PRODUCTS);
+        if (ids != null) {
+            target.queryParam(LIMIT_QUERY_PARAMETER, ids.size());
+            target.queryParam(IDS_QUERY_PARAMETER, ids);
+        }
+
+        final Response response = get(target);
+        final ShopifyProductsRoot shopifyProductsRoot = response.readEntity(ShopifyProductsRoot.class);
+        return new ShopifyProducts(shopifyProductsRoot.getProducts());
+    }
+
     public ShopifyProducts getProducts() {
         final List<ShopifyProduct> shopifyProducts = new LinkedList<>();
 
