@@ -29,9 +29,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -129,7 +127,6 @@ import com.shopify.model.webhook.ShopifyWebhookRoot;
 import com.shopify.model.webhook.ShopifyWebhookTopic;
 import com.shopify.model.webhook.ShopifyWebhooksRoot;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ShopifySdkTest {
 
     private static final String SOME_API_VERSION = "2020-01";
